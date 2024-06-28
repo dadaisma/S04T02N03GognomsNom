@@ -1,9 +1,18 @@
 package cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.dto;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Arrays;
 import java.util.List;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 
 public class FlowerDTO {
     private Integer pkFlowerID;
@@ -20,9 +29,7 @@ public class FlowerDTO {
             "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg",
             "Malta", "Poland", "Portugal", "Czech Republic");
 
-    public FlowerDTO() {
 
-    }
 
 
     public FlowerDTO( String nameFlower, String countryFlower) {
@@ -47,36 +54,6 @@ public class FlowerDTO {
         }
     }
 
-    public Integer getPkFlowerID() {
-        return pkFlowerID;
-    }
 
-    public void setPkFlowerID(Integer pkFlowerID) {
-        this.pkFlowerID = pkFlowerID;
-    }
-
-    public String getNameFlower() {
-        return nameFlower;
-    }
-
-    public void setNameFlower(String nameFlower) {
-        this.nameFlower = nameFlower;
-    }
-
-    public String getCountryFlower() {
-        return countryFlower;
-    }
-
-    public void setCountryFlower(String countryFlower) {
-        this.countryFlower = countryFlower;
-    }
-
-    public String getTypeFlower() {
-        return typeFlower;
-    }
-
-    public void setTypeFlower(String typeFlower) {
-        this.typeFlower = typeFlower;
-    }
 }
 
