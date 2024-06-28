@@ -53,22 +53,6 @@ public class ClientFlowerServiceImpl implements IflowerService {
                         response -> Mono.error(new InvalidFlowerDataException("Failed to update flower with ID " + flowerDTO.getPkFlowerID())))
                 .bodyToMono(FlowerDTO.class)
                 .block();
-
-
-       // Optional<Flower> existingFlowerOptional = IclientFlowerRepository.findById(flowerDTO.getPkFlowerID());
-
-       // if (!existingFlowerOptional.isPresent()) {
-       //     throw new EntityNotFoundException("Update Flower Failed: Invalid ID: " + flowerDTO.getPkFlowerID() +
-       //             " -> DOESN'T EXIST in DataBase");
-     //   }
-
-        // If the entity exists, proceed with updating its fields
-      //  Flower existingFlower = existingFlowerOptional.get();
-      //  existingFlower.setNameFlower(flowerDTO.getNameFlower());
-      //  existingFlower.setCountryFlower(flowerDTO.getCountryFlower());
-
-
-      //  IclientFlowerRepository.save(existingFlower);
     }
 
 
@@ -92,6 +76,8 @@ public class ClientFlowerServiceImpl implements IflowerService {
                 .uri(uriBuilder -> uriBuilder.path("/getOne/{id}")
                         .build(id))
                 .retrieve()
+                .onStatus(status -> status.value() == 404,
+                        response -> Mono.error(new InvalidFlowerDataException("Failed to find flower with ID " + id)))
                 .bodyToMono(FlowerDTO.class)
                 .block();
 
