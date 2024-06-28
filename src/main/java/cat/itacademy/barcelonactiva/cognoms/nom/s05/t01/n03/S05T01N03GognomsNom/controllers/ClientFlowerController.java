@@ -46,4 +46,14 @@ public class ClientFlowerController {
 
     }
 
+    @Operation(summary = "Update an existing flower", description = "Updates the details of an existing flower based on the provided ID")
+    @PutMapping( "/update/{id}")
+    public ResponseEntity<?>  updateFlowerEdit(@PathVariable("id") Integer id,@RequestBody FlowerDTO flowerDTO)  {
+
+        flowerDTO.setPkFlowerID(id); // Set the ID from path variable
+        flowerService.updateFlower(flowerDTO); // Update the FlowerDTO
+        return ResponseEntity.ok().body(flowerDTO);
+
+    }
+
 }

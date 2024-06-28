@@ -55,7 +55,17 @@ public class ClientFlowerServiceImpl implements IflowerService {
 
 
 
-    public void updateFlower(FlowerDTO flowerDTO) {
+    public void updateFlower( FlowerDTO flowerDTO ) {
+        FlowerDTO updatedflowerDTO = webClient
+                .put()
+                .uri(uriBuilder -> uriBuilder.path("/update/{id}")
+                        .build(flowerDTO.getPkFlowerID()))
+                .bodyValue(flowerDTO)  // Set the request body
+                .retrieve()
+                .bodyToMono(FlowerDTO.class)
+                .block();
+
+
        // Optional<Flower> existingFlowerOptional = IclientFlowerRepository.findById(flowerDTO.getPkFlowerID());
 
        // if (!existingFlowerOptional.isPresent()) {
