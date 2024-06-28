@@ -1,34 +1,22 @@
 package cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.services;
 
-import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.domain.Flower;
 import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.dto.FlowerDTO;
 import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.exceptiones.ClientErrorException;
 import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.exceptiones.FlowerNotFoundException;
-import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.exceptiones.InvalidFlowerDataException;
-import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.repository.IclientFlowerRepository;
+import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.exceptiones.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.server.ServerErrorException;
-import reactor.core.publisher.Mono;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.http.HttpStatus;
-
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 @Service
-
-
-
 public class ClientFlowerServiceImpl implements IflowerService {
 
     @Autowired
     private WebClient webClient;
-
-
-
-
 
     public void createFlower(FlowerDTO flowerDTO) {
         try {
@@ -41,81 +29,85 @@ public class ClientFlowerServiceImpl implements IflowerService {
                     .bodyToMono(FlowerDTO.class)
                     .block();
 
-            // Handle the response as needed (optional)
-            // e.g., log success, process returned DTO, etc.
+            // Handle successful creation if needed
         } catch (WebClientResponseException ex) {
-            // Handle WebClientResponseException for specific status codes
-            if (ex.getStatusCode() == HttpStatus.BAD_REQUEST) {
-                throw new InvalidFlowerDataException("Invalid flower data: " + ex.getRawStatusCode());
-            } else if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new FlowerNotFoundException("Flower not found: " + ex.getRawStatusCode());
-            } else if (ex.getStatusCode().is4xxClientError()) {
-                throw new ClientErrorException("Client error: " + ex.getRawStatusCode());
-            }
-           // else if (ex.getStatusCode().is5xxServerError()) {
-          //     throw new ServerErrorException("Server error: " + ex.getRawStatusCode());
-         //   }
-        else {
-                throw new RuntimeException("Unexpected error: " + ex.getRawStatusCode());
-            }
-        }}
-
-
-
-    public void updateFlower( FlowerDTO flowerDTO ) {
-        FlowerDTO updatedflowerDTO = webClient
-                .put()
-                .uri(uriBuilder -> uriBuilder.path("/update/{id}")
-                        .build(flowerDTO.getPkFlowerID()))
-                .bodyValue(flowerDTO)  // Set the request body
-                .retrieve()
-                .onStatus(status -> status.value() == 404,
-                        response -> Mono.error(new InvalidFlowerDataException("Failed to update flower with ID " + flowerDTO.getPkFlowerID())))
-                .bodyToMono(FlowerDTO.class)
-                .block();
+            handleWebClientResponseException(ex);
+        }
     }
 
+    public void updateFlower(FlowerDTO flowerDTO) {
+        try {
+            FlowerDTO updatedflowerDTO = webClient
+                    .put()
+                    .uri(uriBuilder -> uriBuilder.path("/update/{id}")
+                            .build(flowerDTO.getPkFlowerID()))
+                    .bodyValue(flowerDTO)  // Set the request body
+                    .retrieve()
+                    .onStatus(status -> status.value() == 404,
+                            response -> Mono.error(new FlowerNotFoundException("Flower with ID " + flowerDTO.getPkFlowerID() + " not found.")))
+                    .bodyToMono(FlowerDTO.class)
+                    .block();
+        } catch (WebClientResponseException ex) {
+            handleWebClientResponseException(ex);
+        }
+    }
 
     public void deleteFlower(Integer flowerId) {
-                 webClient
-                .delete()
-                .uri(uriBuilder -> uriBuilder.path("/delete/{id}")
-                        .build(flowerId))
-                .retrieve()
-                         .onStatus(status -> status.value() == 404,
-                         response -> Mono.error(new InvalidFlowerDataException("Failed to delete flower with ID " + flowerId)))
-                         .toBodilessEntity()
-                .block();
-
+        try {
+            webClient
+                    .delete()
+                    .uri(uriBuilder -> uriBuilder.path("/delete/{id}")
+                            .build(flowerId))
+                    .retrieve()
+                    .onStatus(status -> status.value() == 404,
+                            response -> Mono.error(new FlowerNotFoundException("Flower with ID " + flowerId + " not found.")))
+                    .toBodilessEntity()
+                    .block();
+        } catch (WebClientResponseException ex) {
+            handleWebClientResponseException(ex);
+        }
     }
-
 
     public FlowerDTO getFlowerById(Integer id) {
-        FlowerDTO flowerDTO = webClient
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/getOne/{id}")
-                        .build(id))
-                .retrieve()
-                .onStatus(status -> status.value() == 404,
-                        response -> Mono.error(new InvalidFlowerDataException("Failed to find flower with ID " + id)))
-                .bodyToMono(FlowerDTO.class)
-                .block();
-
-     return flowerDTO;
+        try {
+            FlowerDTO flowerDTO = webClient
+                    .get()
+                    .uri(uriBuilder -> uriBuilder.path("/getOne/{id}")
+                            .build(id))
+                    .retrieve()
+                    .onStatus(status -> status.value() == 404,
+                            response -> Mono.error(new FlowerNotFoundException("Flower with ID " + id + " not found.")))
+                    .bodyToMono(FlowerDTO.class)
+                    .block();
+            return flowerDTO;
+        } catch (WebClientResponseException ex) {
+            handleWebClientResponseException(ex);
+            return null; // or throw exception depending on your design
+        }
     }
 
-
-
-    public List<FlowerDTO> getAllFlowers(){
-        Mono<List<FlowerDTO>> flowerListMono = webClient
-                .get()
-                .uri("/getAll")
-                .retrieve()
-                .bodyToFlux(FlowerDTO.class)
-                .collectList();
-        List<FlowerDTO> flowerList = flowerListMono.block();
-
-        return flowerList;
+    public List<FlowerDTO> getAllFlowers() {
+        try {
+            Mono<List<FlowerDTO>> flowerListMono = webClient
+                    .get()
+                    .uri("/getAll")
+                    .retrieve()
+                    .bodyToFlux(FlowerDTO.class)
+                    .collectList();
+            return flowerListMono.block();
+        } catch (WebClientResponseException ex) {
+            handleWebClientResponseException(ex);
+            return null; // or throw exception depending on your design
+        }
     }
 
+    private void handleWebClientResponseException(WebClientResponseException ex) {
+        if (ex.getStatusCode().is4xxClientError()) {
+            throw new ClientErrorException(ex.getMessage(), ex);
+        } else if (ex.getStatusCode().is5xxServerError()) {
+            throw new ServerErrorException(ex.getMessage(), ex);
+        } else {
+            throw new RuntimeException("Unexpected error: " + ex.getRawStatusCode(), ex);
+        }
+    }
 }
