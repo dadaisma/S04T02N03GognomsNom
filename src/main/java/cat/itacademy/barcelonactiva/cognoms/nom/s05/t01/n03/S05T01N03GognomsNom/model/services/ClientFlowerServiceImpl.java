@@ -65,6 +65,13 @@ public class ClientFlowerServiceImpl implements IflowerService {
 
 
     public void deleteFlower(Integer flowerId) {
+        FlowerDTO flowerDTO = webClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder.path("/delete/{id}")
+                        .build(flowerId))
+                .retrieve()
+                .bodyToMono(FlowerDTO.class)
+                .block();
      //   if(!IclientFlowerRepository.findById(flowerId).isPresent()){
       //      throw new EntityNotFoundException("Update Flower Failed: Invalid ID: "+ flowerId+
       //              " -> DOESN'T EXIST in DataBase");
