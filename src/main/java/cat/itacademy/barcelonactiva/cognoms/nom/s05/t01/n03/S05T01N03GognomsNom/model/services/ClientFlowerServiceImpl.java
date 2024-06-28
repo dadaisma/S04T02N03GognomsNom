@@ -38,6 +38,15 @@ public class ClientFlowerServiceImpl implements IflowerService {
 
 
     public void createFlower(FlowerDTO flowerDTO) {
+        FlowerDTO createdflowerDTO = webClient
+                .post()
+                .uri(uriBuilder -> uriBuilder.path("/add")
+                        .build())
+                .bodyValue(flowerDTO)  // Set the request body
+                .retrieve()
+                .bodyToMono(FlowerDTO.class)
+                .block();
+       // return flowerDTO;
       //  if (flowerDTO.getNameFlower() == null || flowerDTO.getCountryFlower() == null) {
        //     throw new InvalidFlowerDataException("Name and country cannot be null");
      //   }

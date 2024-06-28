@@ -4,6 +4,7 @@ import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.
 import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.services.ClientFlowerServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,14 @@ public class ClientFlowerController {
     public ResponseEntity<?> deleteFlowerNow(@PathVariable(value="id") Integer id){
         flowerService.deleteFlower(id);
         return ResponseEntity.noContent().build();
+
+    }
+
+    @Operation(summary = "Add a new flower", description = "Creates a new flower and adds it to the system")
+    @PostMapping("/add")
+    public ResponseEntity<?> addFlower(@RequestBody FlowerDTO flowerDTO){
+        flowerService.createFlower(flowerDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(flowerDTO);
 
     }
 
