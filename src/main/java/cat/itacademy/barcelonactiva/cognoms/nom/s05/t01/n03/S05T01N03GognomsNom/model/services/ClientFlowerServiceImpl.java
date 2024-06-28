@@ -2,6 +2,7 @@ package cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom
 
 import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.domain.Flower;
 import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.dto.FlowerDTO;
+import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.exceptiones.InvalidFlowerDataException;
 import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.repository.IclientFlowerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,8 @@ public class ClientFlowerServiceImpl implements IflowerService {
                         .build(flowerDTO.getPkFlowerID()))
                 .bodyValue(flowerDTO)  // Set the request body
                 .retrieve()
+                .onStatus(status -> status.value() == 404,
+                        response -> Mono.error(new InvalidFlowerDataException("Failed to update flower with ID " + flowerDTO.getPkFlowerID())))
                 .bodyToMono(FlowerDTO.class)
                 .block();
 
@@ -70,18 +73,16 @@ public class ClientFlowerServiceImpl implements IflowerService {
 
 
     public void deleteFlower(Integer flowerId) {
-        FlowerDTO flowerDTO = webClient
+                 webClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder.path("/delete/{id}")
                         .build(flowerId))
                 .retrieve()
-                .bodyToMono(FlowerDTO.class)
+                         .onStatus(status -> status.value() == 404,
+                         response -> Mono.error(new InvalidFlowerDataException("Failed to delete flower with ID " + flowerId)))
+                         .toBodilessEntity()
                 .block();
-     //   if(!IclientFlowerRepository.findById(flowerId).isPresent()){
-      //      throw new EntityNotFoundException("Update Flower Failed: Invalid ID: "+ flowerId+
-      //              " -> DOESN'T EXIST in DataBase");
-      //  }
-     //   IclientFlowerRepository.deleteById(flowerId);
+
     }
 
 
