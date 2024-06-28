@@ -13,10 +13,10 @@ public interface IflowerService {
     void updateFlower(FlowerDTO flowerDTO);
 
     void deleteFlower(Integer id);
-/*
+
     FlowerDTO getFlowerById(Integer id);
 
-*/
+
 
     List<FlowerDTO> getAllFlowers();
 

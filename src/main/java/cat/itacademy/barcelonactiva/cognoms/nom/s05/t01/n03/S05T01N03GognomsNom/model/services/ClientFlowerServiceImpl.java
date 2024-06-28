@@ -1,5 +1,6 @@
 package cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.services;
 
+import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.domain.Flower;
 import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.dto.FlowerDTO;
 import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.repository.IclientFlowerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,17 +72,19 @@ public class ClientFlowerServiceImpl implements IflowerService {
      //   IclientFlowerRepository.deleteById(flowerId);
     }
 
-/*
-    public FlowerDTO getFlowerById(Integer flowerId) {
-     //   Flower flower = IclientFlowerRepository.findById(flowerId)
-          //      .orElseThrow(() -> new NoResultException(
-            //            "Get One Flower Failed: Invalid ID: "
-            //                    + flowerId
-            //                    +" -> DOESN'T EXIST in DataBase"));
 
-    // return toDTO(flower);
+    public FlowerDTO getFlowerById(Integer id) {
+        FlowerDTO flowerDTO = webClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/getOne/{id}")
+                        .build(id))
+                .retrieve()
+                .bodyToMono(FlowerDTO.class)
+                .block();
+
+     return flowerDTO;
     }
-*/
+
 
 
     public List<FlowerDTO> getAllFlowers(){
