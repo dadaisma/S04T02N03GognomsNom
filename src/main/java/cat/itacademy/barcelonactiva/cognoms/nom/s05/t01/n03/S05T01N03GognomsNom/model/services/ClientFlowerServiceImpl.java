@@ -2,12 +2,18 @@ package cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom
 
 import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.domain.Flower;
 import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.dto.FlowerDTO;
+import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.exceptiones.ClientErrorException;
+import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.exceptiones.FlowerNotFoundException;
 import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.exceptiones.InvalidFlowerDataException;
 import cat.itacademy.barcelonactiva.cognoms.nom.s05.t01.n03.S05T01N03GognomsNom.model.repository.IclientFlowerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ServerErrorException;
 import reactor.core.publisher.Mono;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.http.HttpStatus;
+
 
 import java.util.List;
 
@@ -25,20 +31,34 @@ public class ClientFlowerServiceImpl implements IflowerService {
 
 
     public void createFlower(FlowerDTO flowerDTO) {
-        FlowerDTO createdflowerDTO = webClient
-                .post()
-                .uri(uriBuilder -> uriBuilder.path("/add")
-                        .build())
-                .bodyValue(flowerDTO)  // Set the request body
-                .retrieve()
-                .bodyToMono(FlowerDTO.class)
-                .block();
-       // return flowerDTO;
-      //  if (flowerDTO.getNameFlower() == null || flowerDTO.getCountryFlower() == null) {
-       //     throw new InvalidFlowerDataException("Name and country cannot be null");
-     //   }
-     //   IclientFlowerRepository.save(toEntity(flowerDTO));
-    }
+        try {
+            FlowerDTO createdFlowerDTO = webClient
+                    .post()
+                    .uri(uriBuilder -> uriBuilder.path("/add")
+                            .build())
+                    .bodyValue(flowerDTO)
+                    .retrieve()
+                    .bodyToMono(FlowerDTO.class)
+                    .block();
+
+            // Handle the response as needed (optional)
+            // e.g., log success, process returned DTO, etc.
+        } catch (WebClientResponseException ex) {
+            // Handle WebClientResponseException for specific status codes
+            if (ex.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                throw new InvalidFlowerDataException("Invalid flower data: " + ex.getRawStatusCode());
+            } else if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new FlowerNotFoundException("Flower not found: " + ex.getRawStatusCode());
+            } else if (ex.getStatusCode().is4xxClientError()) {
+                throw new ClientErrorException("Client error: " + ex.getRawStatusCode());
+            }
+           // else if (ex.getStatusCode().is5xxServerError()) {
+          //     throw new ServerErrorException("Server error: " + ex.getRawStatusCode());
+         //   }
+        else {
+                throw new RuntimeException("Unexpected error: " + ex.getRawStatusCode());
+            }
+        }}
 
 
 
